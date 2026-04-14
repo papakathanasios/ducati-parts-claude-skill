@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from src.core.currency import CurrencyConverter
 
@@ -43,3 +44,28 @@ def test_supported_currencies():
     assert converter.is_supported("BGN") is True
     assert converter.is_supported("EUR") is True
     assert converter.is_supported("XYZ") is False
+
+
+def test_fetch_rates_caches_for_24_hours():
+    converter = CurrencyConverter()
+    converter._rates = {"BGN": Decimal("1.9558")}
+    converter._rates_fetched_at = datetime.now(timezone.utc)
+    converter._rates_available = True
+    assert converter.rates_are_fresh() is True
+
+
+def test_fetch_rates_stale_after_24_hours():
+    converter = CurrencyConverter()
+    converter._rates = {"BGN": Decimal("1.9558")}
+    converter._rates_fetched_at = datetime.now(timezone.utc) - timedelta(hours=25)
+    converter._rates_available = True
+    assert converter.rates_are_fresh() is False
+
+
+def test_rates_available_flag():
+    converter = CurrencyConverter()
+    assert converter._rates_available is False
+    converter._rates = {"BGN": Decimal("1.9558")}
+    converter._rates_fetched_at = datetime.now(timezone.utc)
+    converter._rates_available = True
+    assert converter._rates_available is True

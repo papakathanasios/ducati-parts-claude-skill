@@ -47,6 +47,25 @@ def test_search_filters_defaults():
     assert filters.sources == []
 
 
+def test_search_filters_translations_default_none():
+    f = SearchFilters(query="exhaust")
+    assert f.translations is None
+
+def test_search_filters_max_price_hint_default_none():
+    f = SearchFilters(query="exhaust")
+    assert f.max_price_hint is None
+
+def test_search_filters_with_translations():
+    f = SearchFilters(query="exhaust", translations={"bg": "ауспух", "it": "scarico"})
+    assert f.translations["bg"] == "ауспух"
+    assert f.translations["it"] == "scarico"
+
+def test_search_filters_with_max_price_hint():
+    from decimal import Decimal
+    f = SearchFilters(query="exhaust", max_price_hint=Decimal("400"))
+    assert f.max_price_hint == Decimal("400")
+
+
 def test_raw_listing_creation():
     raw = RawListing(
         source_id="123", source="ebay", title="Test part", description="A part",

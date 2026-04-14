@@ -66,3 +66,86 @@ bike:
 """)
     with pytest.raises(KeyError):
         load_config(str(config_yaml))
+
+
+def test_adapter_timeout_seconds_explicit_value(tmp_path):
+    config_yaml = tmp_path / "config.yaml"
+    config_yaml.write_text("""
+bike:
+  default_model: "Multistrada 1260 Enduro"
+  year_range: [2019, 2021]
+  also_compatible:
+    - "Multistrada 1260"
+
+shipping:
+  destination_country: "GR"
+  destination_postal: "15562"
+  destination_city: "Athens"
+  shipping_ratio_warning: 0.5
+
+search:
+  default_tiers: [1, 2]
+  max_results_per_source: 50
+  currency_display: "EUR"
+  adapter_timeout_seconds: 45
+
+condition:
+  min_score: "red"
+  photo_required: false
+
+watch:
+  check_interval_hours: 4
+  stale_listing_days: 30
+  notification: "macos"
+
+tiers:
+  1:
+    - olx_bg
+  2:
+    - subito_it
+  3:
+    - kleinanzeigen_de
+""")
+    cfg = load_config(str(config_yaml))
+    assert cfg.search.adapter_timeout_seconds == 45
+
+
+def test_adapter_timeout_seconds_default_value(tmp_path):
+    config_yaml = tmp_path / "config.yaml"
+    config_yaml.write_text("""
+bike:
+  default_model: "Multistrada 1260 Enduro"
+  year_range: [2019, 2021]
+  also_compatible:
+    - "Multistrada 1260"
+
+shipping:
+  destination_country: "GR"
+  destination_postal: "15562"
+  destination_city: "Athens"
+  shipping_ratio_warning: 0.5
+
+search:
+  default_tiers: [1, 2]
+  max_results_per_source: 50
+  currency_display: "EUR"
+
+condition:
+  min_score: "red"
+  photo_required: false
+
+watch:
+  check_interval_hours: 4
+  stale_listing_days: 30
+  notification: "macos"
+
+tiers:
+  1:
+    - olx_bg
+  2:
+    - subito_it
+  3:
+    - kleinanzeigen_de
+""")
+    cfg = load_config(str(config_yaml))
+    assert cfg.search.adapter_timeout_seconds == 30

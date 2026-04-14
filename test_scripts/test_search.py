@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime, timezone
 from decimal import Decimal
 from src.core.search import SearchOrchestrator
 from src.core.types import RawListing, SearchFilters
@@ -39,7 +40,7 @@ def _make_config() -> AppConfig:
     return AppConfig(
         bike=BikeConfig(default_model="Multistrada 1260 Enduro", year_range=[2019, 2021], also_compatible=["Multistrada 1260"]),
         shipping=ShippingConfig(destination_country="GR", destination_postal="15562", destination_city="Athens", shipping_ratio_warning=0.5),
-        search=SearchConfig(default_tiers=[1, 2], max_results_per_source=50, currency_display="EUR"),
+        search=SearchConfig(default_tiers=[1, 2], max_results_per_source=50, currency_display="EUR", adapter_timeout_seconds=30),
         condition=ConditionConfig(min_score="red", photo_required=False),
         watch=WatchConfig(check_interval_hours=4, stale_listing_days=30, notification="macos"),
         tiers={1: ["mock"], 2: [], 3: []},
@@ -113,3 +114,68 @@ def test_dedup_removes_duplicate_listings():
     filters = SearchFilters(query="lever", tiers=[1])
     listings = asyncio.run(orchestrator.run(filters))
     assert len(listings) == 1
+
+
+def test_orchestrator_converts_non_eur_currency():
+    raw = RawListing(source_id="1", source="mock", title="Clutch lever Multistrada",
+        description="Good condition", price=39.12, currency="BGN", shipping_price=None,
+        seller_country="BG", condition_label="Good", photos=["https://example.com/p.jpg"],
+        listing_url="https://mock.com/1")
+    adapter = MockAdapter([raw])
+    config = _make_config()
+    orchestrator = SearchOrchestrator(config=config, adapters={"mock": adapter})
+    orchestrator.currency_converter._rates = {"BGN": Decimal("1.9558")}
+    orchestrator.currency_converter._rates_available = True
+    orchestrator.currency_converter._rates_fetched_at = datetime.now(timezone.utc)
+    filters = SearchFilters(query="clutch lever", tiers=[1])
+    listings = asyncio.run(orchestrator.run(filters))
+    assert len(listings) == 1
+    assert listings[0].part_price == Decimal("20.00")
+    assert listings[0].currency_original == "BGN"
+
+
+def test_orchestrator_handles_ecb_failure_gracefully():
+    raw = RawListing(source_id="1", source="mock", title="Lever Multistrada",
+        description="Good condition", price=20.0, currency="EUR", shipping_price=8.0,
+        seller_country="BG", condition_label="Good", photos=[],
+        listing_url="https://mock.com/1")
+    adapter = MockAdapter([raw])
+    config = _make_config()
+    orchestrator = SearchOrchestrator(config=config, adapters={"mock": adapter})
+    orchestrator.currency_converter._rates_available = False
+    orchestrator.currency_converter._rates = {}
+    filters = SearchFilters(query="lever", tiers=[1])
+    listings = asyncio.run(orchestrator.run(filters))
+    assert len(listings) == 1
+
+
+def test_orchestrator_relevance_filter_accepts_translated_match():
+    raw = RawListing(source_id="1", source="mock", title="ауспух Ducati Multistrada",
+        description="добро състояние", price=200.0, currency="EUR", shipping_price=10.0,
+        seller_country="BG", condition_label="Good", photos=[],
+        listing_url="https://mock.com/1")
+    adapter = MockAdapter([raw])
+    config = _make_config()
+    orchestrator = SearchOrchestrator(config=config, adapters={"mock": adapter})
+    filters = SearchFilters(query="exhaust Ducati Multistrada", tiers=[1])
+    listings = asyncio.run(orchestrator.run(filters))
+    assert len(listings) == 1
+
+
+def test_orchestrator_parallel_with_failing_adapter():
+    good_raw = RawListing(source_id="1", source="mock", title="Lever Multistrada",
+        description="Good", price=20.0, currency="EUR", shipping_price=8.0,
+        seller_country="BG", condition_label="Good", photos=[],
+        listing_url="https://mock.com/1")
+    good_adapter = MockAdapter([good_raw])
+    failing_adapter = FailingAdapter()
+    config = _make_config()
+    config.tiers[1] = ["mock", "failing"]
+    orchestrator = SearchOrchestrator(
+        config=config,
+        adapters={"mock": good_adapter, "failing": failing_adapter},
+    )
+    filters = SearchFilters(query="lever", tiers=[1])
+    listings = asyncio.run(orchestrator.run(filters))
+    assert len(listings) == 1
+    assert "failing" in orchestrator.last_errors

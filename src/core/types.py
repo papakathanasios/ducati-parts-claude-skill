@@ -73,3 +73,5 @@ class SearchFilters:
     sources: list[str] = field(default_factory=list)
     oem_number: str | None = None
     part_category: str | None = None
+    translations: dict[str, str] | None = None
+    max_price_hint: Decimal | None = None

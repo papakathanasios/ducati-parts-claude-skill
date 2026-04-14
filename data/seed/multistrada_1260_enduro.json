@@ -57,6 +57,24 @@
         "part_name": "Front Fork Sachs",
         "category": "suspension",
         "search_aliases": ["front fork", "sachs fork", "suspension fork", "USD fork", "34520861A"]
+      },
+      {
+        "oem_number": "",
+        "part_name": "Exhaust Headers",
+        "category": "exhaust",
+        "search_aliases": ["exhaust headers", "manifold", "exhaust pipes", "header pipes"]
+      },
+      {
+        "oem_number": "34921341A",
+        "part_name": "Rear Shock Sachs",
+        "category": "suspension",
+        "search_aliases": ["rear shock", "sachs shock", "rear suspension", "shock absorber", "34921341A"]
+      },
+      {
+        "oem_number": "96480751A",
+        "part_name": "Slip-On Muffler",
+        "category": "exhaust",
+        "search_aliases": ["slip-on", "muffler", "silencer", "slip-on exhaust", "96480751A"]
       }
     ],
     "shared": [
@@ -114,6 +132,125 @@
         "part_name": "Headlight",
         "category": "electrical",
         "search_aliases": ["headlight", "headlamp", "front light", "LED headlight", "52010561A"],
+        "compatible_with": ["Multistrada 1260", "Multistrada 1260 S", "Multistrada 1260 Pikes Peak"]
+      },
+      {
+        "oem_number": "61341051A",
+        "part_name": "Rear Brake Pads",
+        "category": "brakes",
+        "search_aliases": ["rear brake pads", "rear pads", "61341051A"],
+        "compatible_with": ["Multistrada 1260", "Multistrada 1260 S", "Multistrada 1260 Pikes Peak"]
+      },
+      {
+        "oem_number": "49240101A",
+        "part_name": "Front Brake Disc",
+        "category": "brakes",
+        "search_aliases": ["front brake disc", "front rotor", "brake rotor", "49240101A"],
+        "compatible_with": ["Multistrada 1260", "Multistrada 1260 S", "Multistrada 1260 Pikes Peak"]
+      },
+      {
+        "oem_number": "61041341A",
+        "part_name": "Front Brake Caliper",
+        "category": "brakes",
+        "search_aliases": ["front caliper", "brake caliper", "brembo caliper", "61041341A"],
+        "compatible_with": ["Multistrada 1260", "Multistrada 1260 S", "Multistrada 1260 Pikes Peak"]
+      },
+      {
+        "oem_number": "46012721A",
+        "part_name": "Foot Pegs",
+        "category": "controls",
+        "search_aliases": ["foot pegs", "footpegs", "rider pegs", "46012721A"],
+        "compatible_with": ["Multistrada 1260", "Multistrada 1260 S", "Multistrada 1260 Pikes Peak"]
+      },
+      {
+        "oem_number": "36011951A",
+        "part_name": "Handlebar",
+        "category": "controls",
+        "search_aliases": ["handlebar", "handlebars", "handle bar", "36011951A"],
+        "compatible_with": ["Multistrada 1260", "Multistrada 1260 S", "Multistrada 1260 Pikes Peak"]
+      },
+      {
+        "oem_number": "52510441A",
+        "part_name": "Tail Light",
+        "category": "electrical",
+        "search_aliases": ["tail light", "taillight", "rear light", "brake light", "52510441A"],
+        "compatible_with": ["Multistrada 1260", "Multistrada 1260 S", "Multistrada 1260 Pikes Peak"]
+      },
+      {
+        "oem_number": "40611291A",
+        "part_name": "Instrument Cluster",
+        "category": "electrical",
+        "search_aliases": ["instrument cluster", "dashboard", "speedometer", "TFT display", "40611291A"],
+        "compatible_with": ["Multistrada 1260", "Multistrada 1260 S", "Multistrada 1260 Pikes Peak"]
+      },
+      {
+        "oem_number": "16024071A",
+        "part_name": "Fuel Pump",
+        "category": "fuel",
+        "search_aliases": ["fuel pump", "petrol pump", "benzin pump", "16024071A"],
+        "compatible_with": ["Multistrada 1260", "Multistrada 1260 S", "Multistrada 1260 Pikes Peak"]
+      },
+      {
+        "oem_number": "28240991A",
+        "part_name": "Throttle Body",
+        "category": "fuel",
+        "search_aliases": ["throttle body", "throttle bodies", "28240991A"],
+        "compatible_with": ["Multistrada 1260", "Multistrada 1260 S", "Multistrada 1260 Pikes Peak"]
+      },
+      {
+        "oem_number": "42620201A",
+        "part_name": "Air Filter",
+        "category": "consumables",
+        "search_aliases": ["air filter", "air cleaner", "42620201A"],
+        "compatible_with": ["Multistrada 1260", "Multistrada 1260 S", "Multistrada 1260 Pikes Peak"]
+      },
+      {
+        "oem_number": "44440312A",
+        "part_name": "Oil Filter",
+        "category": "consumables",
+        "search_aliases": ["oil filter", "44440312A"],
+        "compatible_with": ["Multistrada 1260", "Multistrada 1260 S", "Multistrada 1260 Pikes Peak"]
+      },
+      {
+        "oem_number": "67040631A",
+        "part_name": "Clutch Plates",
+        "category": "drivetrain",
+        "search_aliases": ["clutch plates", "friction plates", "clutch discs", "67040631A"],
+        "compatible_with": ["Multistrada 1260", "Multistrada 1260 S", "Multistrada 1260 Pikes Peak"]
+      },
+      {
+        "oem_number": "",
+        "part_name": "Coolant Hoses",
+        "category": "cooling",
+        "search_aliases": ["coolant hoses", "radiator hoses", "water hoses"],
+        "compatible_with": ["Multistrada 1260", "Multistrada 1260 S", "Multistrada 1260 Pikes Peak"]
+      },
+      {
+        "oem_number": "28641301A",
+        "part_name": "ECU",
+        "category": "electrical",
+        "search_aliases": ["ECU", "engine control unit", "electronic control", "28641301A"],
+        "compatible_with": ["Multistrada 1260", "Multistrada 1260 S", "Multistrada 1260 Pikes Peak"]
+      },
+      {
+        "oem_number": "53620711A",
+        "part_name": "Turn Signal",
+        "category": "electrical",
+        "search_aliases": ["turn signal", "indicator", "blinker", "53620711A"],
+        "compatible_with": ["Multistrada 1260", "Multistrada 1260 S", "Multistrada 1260 Pikes Peak"]
+      },
+      {
+        "oem_number": "",
+        "part_name": "Grips",
+        "category": "controls",
+        "search_aliases": ["grips", "handlebar grips", "rubber grips", "heated grips"],
+        "compatible_with": ["Multistrada 1260", "Multistrada 1260 S", "Multistrada 1260 Pikes Peak"]
+      },
+      {
+        "oem_number": "67090401A",
+        "part_name": "Spark Plugs",
+        "category": "consumables",
+        "search_aliases": ["spark plug", "spark plugs", "ignition plug", "67090401A"],
         "compatible_with": ["Multistrada 1260", "Multistrada 1260 S", "Multistrada 1260 Pikes Peak"]
       }
     ]

@@ -24,6 +24,7 @@ class SearchConfig:
     default_tiers: list[int]
     max_results_per_source: int
     currency_display: str
+    adapter_timeout_seconds: int = 30
 
 
 @dataclass
@@ -62,10 +63,18 @@ def load_config(config_path: str) -> AppConfig:
         if section not in raw:
             raise KeyError(f"Missing required config section: {section}")
 
+    search_data = raw["search"]
+    search_config = SearchConfig(
+        default_tiers=search_data["default_tiers"],
+        max_results_per_source=search_data["max_results_per_source"],
+        currency_display=search_data["currency_display"],
+        adapter_timeout_seconds=search_data.get("adapter_timeout_seconds", 30),
+    )
+
     return AppConfig(
         bike=BikeConfig(**raw["bike"]),
         shipping=ShippingConfig(**raw["shipping"]),
-        search=SearchConfig(**raw["search"]),
+        search=search_config,
         condition=ConditionConfig(**raw["condition"]),
         watch=WatchConfig(**raw["watch"]),
         tiers={int(k): v for k, v in raw["tiers"].items()},
