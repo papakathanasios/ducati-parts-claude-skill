@@ -19,6 +19,10 @@ class CurrencyConverter:
         self._rates_fetched_at: datetime | None = None
         self._rates_available: bool = False
 
+    @property
+    def rates_available(self) -> bool:
+        return self._rates_available
+
     def rates_are_fresh(self) -> bool:
         if self._rates_fetched_at is None:
             return False

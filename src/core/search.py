@@ -98,7 +98,7 @@ class SearchOrchestrator:
 
             part_price_raw = Decimal(str(raw.price))
             currency = raw.currency.upper()
-            if currency != "EUR" and self.currency_converter._rates_available:
+            if currency != "EUR" and self.currency_converter.rates_available:
                 try:
                     part_price = self.currency_converter.convert(part_price_raw, currency)
                 except KeyError:
@@ -109,7 +109,13 @@ class SearchOrchestrator:
             part_price = part_price.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
             if raw.shipping_price is not None:
-                shipping = Decimal(str(raw.shipping_price)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+                shipping_raw = Decimal(str(raw.shipping_price))
+                if currency != "EUR" and self.currency_converter.rates_available:
+                    try:
+                        shipping_raw = self.currency_converter.convert(shipping_raw, currency)
+                    except KeyError:
+                        pass
+                shipping = shipping_raw.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
             else:
                 shipping = self.shipping_estimator.midpoint(raw.seller_country)
 
@@ -134,7 +140,7 @@ class SearchOrchestrator:
             )
 
             if filters.max_total_price:
-                if currency != "EUR" and not self.currency_converter._rates_available:
+                if currency != "EUR" and not self.currency_converter.rates_available:
                     pass
                 elif listing.total_price > filters.max_total_price:
                     continue
