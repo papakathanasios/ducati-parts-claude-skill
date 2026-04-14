@@ -1,0 +1,121 @@
+{
+  "model": "Multistrada 1260 Enduro",
+  "year_range": "2019-2021",
+  "variant": "Enduro",
+  "parts": {
+    "enduro_specific": [
+      {
+        "oem_number": "96481712A",
+        "part_name": "Akrapovic Exhaust OEM",
+        "category": "exhaust",
+        "search_aliases": ["akrapovic", "exhaust system", "muffler", "silencer", "96481712A"]
+      },
+      {
+        "oem_number": "97380961A",
+        "part_name": "Skid Plate",
+        "category": "protection",
+        "search_aliases": ["skid plate", "belly pan", "engine guard", "underbody protection", "97380961A"]
+      },
+      {
+        "oem_number": "55610952AA",
+        "part_name": "Center Stand",
+        "category": "chassis",
+        "search_aliases": ["center stand", "centre stand", "main stand", "55610952AA"]
+      },
+      {
+        "oem_number": "96880991A",
+        "part_name": "Rally Seat",
+        "category": "ergonomics",
+        "search_aliases": ["rally seat", "enduro seat", "comfort seat", "rider seat", "96880991A"]
+      },
+      {
+        "oem_number": "50121561A",
+        "part_name": "Spoked Wheel Front",
+        "category": "wheels",
+        "search_aliases": ["spoked wheel front", "front wheel", "wire wheel front", "19 inch wheel", "50121561A"]
+      },
+      {
+        "oem_number": "50221561A",
+        "part_name": "Spoked Wheel Rear",
+        "category": "wheels",
+        "search_aliases": ["spoked wheel rear", "rear wheel", "wire wheel rear", "17 inch wheel", "50221561A"]
+      },
+      {
+        "oem_number": "97380971A",
+        "part_name": "Crash Bars",
+        "category": "protection",
+        "search_aliases": ["crash bars", "engine bars", "engine protection", "frame sliders", "97380971A"]
+      },
+      {
+        "oem_number": "48710571A",
+        "part_name": "Windscreen",
+        "category": "bodywork",
+        "search_aliases": ["windscreen", "windshield", "touring screen", "wind deflector", "48710571A"]
+      },
+      {
+        "oem_number": "34520861A",
+        "part_name": "Front Fork Sachs",
+        "category": "suspension",
+        "search_aliases": ["front fork", "sachs fork", "suspension fork", "USD fork", "34520861A"]
+      }
+    ],
+    "shared": [
+      {
+        "oem_number": "63040601A",
+        "part_name": "Clutch Lever",
+        "category": "controls",
+        "search_aliases": ["clutch lever", "clutch handle", "left lever", "63040601A"],
+        "compatible_with": ["Multistrada 1260", "Multistrada 1260 S", "Multistrada 1260 Pikes Peak"]
+      },
+      {
+        "oem_number": "63040501A",
+        "part_name": "Brake Lever",
+        "category": "controls",
+        "search_aliases": ["brake lever", "front brake lever", "right lever", "63040501A"],
+        "compatible_with": ["Multistrada 1260", "Multistrada 1260 S", "Multistrada 1260 Pikes Peak"]
+      },
+      {
+        "oem_number": "61340961A",
+        "part_name": "Front Brake Pads",
+        "category": "brakes",
+        "search_aliases": ["front brake pads", "brake pads", "front pads", "brembo pads", "61340961A"],
+        "compatible_with": ["Multistrada 1260", "Multistrada 1260 S", "Multistrada 1260 Pikes Peak"]
+      },
+      {
+        "oem_number": "52340501A",
+        "part_name": "Mirror Left",
+        "category": "bodywork",
+        "search_aliases": ["mirror left", "left mirror", "side mirror", "rearview mirror", "52340501A"],
+        "compatible_with": ["Multistrada 1260", "Multistrada 1260 S", "Multistrada 1260 Pikes Peak"]
+      },
+      {
+        "oem_number": "52340601A",
+        "part_name": "Mirror Right",
+        "category": "bodywork",
+        "search_aliases": ["mirror right", "right mirror", "side mirror", "rearview mirror", "52340601A"],
+        "compatible_with": ["Multistrada 1260", "Multistrada 1260 S", "Multistrada 1260 Pikes Peak"]
+      },
+      {
+        "oem_number": "67620711A",
+        "part_name": "Chain Kit",
+        "category": "drivetrain",
+        "search_aliases": ["chain kit", "chain and sprocket", "drive chain", "chain set", "67620711A"],
+        "compatible_with": ["Multistrada 1260", "Multistrada 1260 S", "Multistrada 1260 Pikes Peak"]
+      },
+      {
+        "oem_number": "54840901A",
+        "part_name": "Radiator",
+        "category": "cooling",
+        "search_aliases": ["radiator", "coolant radiator", "water radiator", "cooling system", "54840901A"],
+        "compatible_with": ["Multistrada 1260", "Multistrada 1260 S", "Multistrada 1260 Pikes Peak"]
+      },
+      {
+        "oem_number": "52010561A",
+        "part_name": "Headlight",
+        "category": "electrical",
+        "search_aliases": ["headlight", "headlamp", "front light", "LED headlight", "52010561A"],
+        "compatible_with": ["Multistrada 1260", "Multistrada 1260 S", "Multistrada 1260 Pikes Peak"]
+      }
+    ]
+  }
+}
