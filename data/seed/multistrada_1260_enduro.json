@@ -69,6 +69,12 @@
         "part_name": "Rear Shock Sachs",
         "category": "suspension",
         "search_aliases": ["rear shock", "sachs shock", "rear suspension", "shock absorber", "34921341A"]
+      },
+      {
+        "oem_number": "96480751A",
+        "part_name": "Slip-On Muffler",
+        "category": "exhaust",
+        "search_aliases": ["slip-on", "muffler", "silencer", "slip-on exhaust", "96480751A"]
       }
     ],
     "shared": [
@@ -231,6 +237,20 @@
         "part_name": "Turn Signal",
         "category": "electrical",
         "search_aliases": ["turn signal", "indicator", "blinker", "53620711A"],
+        "compatible_with": ["Multistrada 1260", "Multistrada 1260 S", "Multistrada 1260 Pikes Peak"]
+      },
+      {
+        "oem_number": "",
+        "part_name": "Grips",
+        "category": "controls",
+        "search_aliases": ["grips", "handlebar grips", "rubber grips", "heated grips"],
+        "compatible_with": ["Multistrada 1260", "Multistrada 1260 S", "Multistrada 1260 Pikes Peak"]
+      },
+      {
+        "oem_number": "67090401A",
+        "part_name": "Spark Plugs",
+        "category": "consumables",
+        "search_aliases": ["spark plug", "spark plugs", "ignition plug", "67090401A"],
         "compatible_with": ["Multistrada 1260", "Multistrada 1260 S", "Multistrada 1260 Pikes Peak"]
       }
     ]
