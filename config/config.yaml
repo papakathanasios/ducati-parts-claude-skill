@@ -16,6 +16,7 @@ search:
   default_tiers: [1, 2]
   max_results_per_source: 50
   currency_display: "EUR"
+  adapter_timeout_seconds: 30
 
 condition:
   min_score: "red"
