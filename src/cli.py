@@ -41,6 +41,7 @@ async def run_search(
     tiers=None,
     sources=None,
     adapters=None,
+    translations=None,
 ) -> str:
     if config_path is None:
         config_path = str(PROJECT_ROOT / "config" / "config.yaml")
@@ -61,24 +62,33 @@ async def run_search(
         max_total_price=Decimal(str(max_total_price)) if max_total_price else None,
         tiers=tiers or config.search.default_tiers,
         sources=sources or [],
+        translations=translations,
     )
 
-    listings = await orchestrator.run(filters)
+    try:
+        listings = await orchestrator.run(filters)
 
-    timestamp = datetime.now().strftime("%Y-%m-%d_%H%M%S")
-    safe_query = query.replace(" ", "-").replace("/", "-")[:50]
-    report_path = str(Path(reports_dir) / f"{timestamp}_{safe_query}.html")
+        timestamp = datetime.now().strftime("%Y-%m-%d_%H%M%S")
+        safe_query = query.replace(" ", "-").replace("/", "-")[:50]
+        report_path = str(Path(reports_dir) / f"{timestamp}_{safe_query}.html")
 
-    generate_html_report(listings, query=query, output_path=report_path)
-    output = format_terminal_report(listings, query=query, report_path=report_path)
-    print(output)
+        generate_html_report(listings, query=query, output_path=report_path)
+        output = format_terminal_report(listings, query=query, report_path=report_path)
+        print(output)
 
-    if orchestrator.last_errors:
-        print("\nAdapter errors:")
-        for name, error in orchestrator.last_errors.items():
-            print(f"  {name}: {error}")
+        if orchestrator.last_errors:
+            print("\nAdapter errors:")
+            for name, error in orchestrator.last_errors.items():
+                print(f"  {name}: {error}")
 
-    return report_path
+        return report_path
+    finally:
+        for adapter in adapters.values():
+            if hasattr(adapter, 'close'):
+                try:
+                    await adapter.close()
+                except Exception:
+                    pass
 
 
 async def run_watch_list(config_path=None, db_path=None) -> str:
