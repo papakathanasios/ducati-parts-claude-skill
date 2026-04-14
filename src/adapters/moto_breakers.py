@@ -1,9 +1,14 @@
-"""Moto-Breakers.co.uk adapter – UK motorcycle parts marketplace."""
+"""Moto-Breakers.co.uk adapter – UK motorcycle parts marketplace.
+
+NOTE: As of April 2026, moto-breakers.co.uk is unreachable.
+This adapter is kept disabled. Re-enable if the site comes back online.
+"""
 
 from urllib.parse import quote
 
 from playwright.async_api import Page
 
+from src.adapters.base import AdapterHealthCheck
 from src.adapters.playwright_base import PlaywrightBaseAdapter
 from src.core.types import RawListing
 
@@ -19,66 +24,11 @@ class MotoBreakersAdapter(PlaywrightBaseAdapter):
         return f"{self.base_url}/search?q={quote(query)}"
 
     async def _extract_listings(self, page: Page, query: str) -> list[RawListing]:
-        results: list[RawListing] = []
-        # Skeleton: CSS selectors need refinement during live testing
-        cards = await page.query_selector_all(
-            "[class*='item'], [class*='card'], article"
+        # Site is unreachable as of April 2026
+        return []
+
+    async def health_check(self) -> AdapterHealthCheck:
+        return AdapterHealthCheck(
+            healthy=False,
+            message="moto-breakers.co.uk is unreachable (site down since April 2026)",
         )
-        for card in cards[:50]:
-            try:
-                title_el = await card.query_selector("h2, h3, [class*='title']")
-                title = await title_el.inner_text() if title_el else ""
-
-                price_el = await card.query_selector("[class*='price']")
-                price_text = await price_el.inner_text() if price_el else "0"
-                price = self._parse_price(price_text)
-
-                link_el = await card.query_selector("a")
-                href = await link_el.get_attribute("href") if link_el else ""
-                listing_url = (
-                    href if href and href.startswith("http") else f"{self.base_url}{href}"
-                )
-
-                img_el = await card.query_selector("img")
-                photo_url = await img_el.get_attribute("src") if img_el else ""
-                photos = [photo_url] if photo_url else []
-
-                results.append(
-                    RawListing(
-                        source_id=(
-                            href.split("/")[-1].split(".")[0]
-                            if href
-                            else str(len(results))
-                        ),
-                        source=self.source_name,
-                        title=title,
-                        description="",
-                        price=price,
-                        currency=self.currency,
-                        shipping_price=None,
-                        seller_country=self.country,
-                        condition_label="",
-                        photos=photos,
-                        listing_url=listing_url,
-                    )
-                )
-            except Exception:
-                continue
-        return results
-
-    @staticmethod
-    def _parse_price(text: str) -> float:
-        cleaned = "".join(c for c in text if c.isdigit() or c in ".,")
-        if not cleaned:
-            return 0.0
-        if "," in cleaned and "." in cleaned:
-            if cleaned.rfind(",") > cleaned.rfind("."):
-                cleaned = cleaned.replace(".", "").replace(",", ".")
-            else:
-                cleaned = cleaned.replace(",", "")
-        else:
-            cleaned = cleaned.replace(",", ".")
-        try:
-            return float(cleaned)
-        except ValueError:
-            return 0.0

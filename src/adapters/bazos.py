@@ -1,5 +1,6 @@
 """Bazos adapters – Czech (bazos.cz) and Slovak (bazos.sk) classifieds."""
 
+import re
 from urllib.parse import quote
 
 from playwright.async_api import Page
@@ -13,39 +14,61 @@ class _BazosBase(PlaywrightBaseAdapter):
 
     async def _extract_listings(self, page: Page, query: str) -> list[RawListing]:
         results: list[RawListing] = []
-        # Skeleton: CSS selectors need refinement during live testing
-        cards = await page.query_selector_all(
-            "[class*='item'], [class*='card'], article"
-        )
+        cards = await page.query_selector_all("div.inzeraty")
+
         for card in cards[:50]:
             try:
-                title_el = await card.query_selector("h2, h3, [class*='title']")
-                title = await title_el.inner_text() if title_el else ""
+                # Title from h2.nadpis > a
+                title_el = await card.query_selector(".nadpis a")
+                title = (await title_el.inner_text()).strip() if title_el else ""
+                if not title:
+                    continue
 
-                price_el = await card.query_selector("[class*='price']")
-                price_text = await price_el.inner_text() if price_el else "0"
-                price = self._parse_price(price_text)
-
-                link_el = await card.query_selector("a")
-                href = await link_el.get_attribute("href") if link_el else ""
+                # Link (full URL on bazos, e.g., https://motorky.bazos.cz/inzerat/...)
+                href = await title_el.get_attribute("href") if title_el else ""
                 listing_url = (
-                    href if href and href.startswith("http") else f"{self.base_url}{href}"
+                    href if href and href.startswith("http")
+                    else f"{self.base_url}{href}"
                 )
 
-                img_el = await card.query_selector("img")
-                photo_url = await img_el.get_attribute("src") if img_el else ""
-                photos = [photo_url] if photo_url else []
+                # Source ID from URL (e.g., .../inzerat/217101759/...)
+                source_id = ""
+                if href:
+                    match = re.search(r"/inzerat/(\d+)/", href)
+                    if match:
+                        source_id = match.group(1)
+                    else:
+                        source_id = href.rstrip("/").split("/")[-1].split(".")[0]
+
+                # Price from .inzeratycena
+                price = 0.0
+                price_el = await card.query_selector(".inzeratycena")
+                if price_el:
+                    price_text = (await price_el.inner_text()).strip()
+                    price = self._parse_price(price_text)
+
+                # Description from .popis
+                description = ""
+                desc_el = await card.query_selector(".popis")
+                if desc_el:
+                    description = (await desc_el.inner_text()).strip()[:200]
+
+                # Image
+                photos: list[str] = []
+                img_el = await card.query_selector("img.obrazek")
+                if not img_el:
+                    img_el = await card.query_selector("img")
+                if img_el:
+                    src = await img_el.get_attribute("src")
+                    if src and not src.startswith("data:"):
+                        photos.append(src)
 
                 results.append(
                     RawListing(
-                        source_id=(
-                            href.split("/")[-1].split(".")[0]
-                            if href
-                            else str(len(results))
-                        ),
+                        source_id=source_id,
                         source=self.source_name,
                         title=title,
-                        description="",
+                        description=description,
                         price=price,
                         currency=self.currency,
                         shipping_price=None,
@@ -61,7 +84,18 @@ class _BazosBase(PlaywrightBaseAdapter):
 
     @staticmethod
     def _parse_price(text: str) -> float:
-        cleaned = "".join(c for c in text if c.isdigit() or c in ".,")
+        if not text:
+            return 0.0
+        # Czech/Slovak format: "280 000 Kč" or "150 €"
+        cleaned = (
+            text.replace("Kč", "")
+            .replace("€", "")
+            .replace("EUR", "")
+            .replace("CZK", "")
+            .strip()
+        )
+        cleaned = re.sub(r"[^\d.,\s]", "", cleaned).strip()
+        cleaned = cleaned.replace(" ", "")
         if not cleaned:
             return 0.0
         if "," in cleaned and "." in cleaned:
@@ -69,7 +103,7 @@ class _BazosBase(PlaywrightBaseAdapter):
                 cleaned = cleaned.replace(".", "").replace(",", ".")
             else:
                 cleaned = cleaned.replace(",", "")
-        else:
+        elif "," in cleaned:
             cleaned = cleaned.replace(",", ".")
         try:
             return float(cleaned)

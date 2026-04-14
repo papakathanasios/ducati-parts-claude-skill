@@ -30,20 +30,17 @@ tiers:
   1:
     - olx_bg
     - olx_ro
-    - allegro_pl
-    - jofogas_hu
+    - olx_pl
+    - allegro
+    - jofogas
     - bazos_cz
     - bazos_sk
-    - njuskalo_hr
-    - bolha_si
-    - facebook_eastern_eu
+    - njuskalo
+    - bolha
   2:
     - subito_it
     - ebay_eu
-    - moto_breakers
   3:
-    - kleinanzeigen_de
-    - leboncoin_fr
-    - wallapop_es
-    - facebook_western_eu
-    - uk_sites
+    - kleinanzeigen
+    - leboncoin
+    - wallapop

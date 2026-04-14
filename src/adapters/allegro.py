@@ -1,5 +1,6 @@
 """Allegro.pl adapter – Polish marketplace."""
 
+import re
 from urllib.parse import quote
 
 from playwright.async_api import Page
@@ -20,36 +21,54 @@ class AllegroAdapter(PlaywrightBaseAdapter):
 
     async def _extract_listings(self, page: Page, query: str) -> list[RawListing]:
         results: list[RawListing] = []
-        # Skeleton: CSS selectors need refinement during live testing
         cards = await page.query_selector_all(
-            "[class*='item'], [class*='card'], article"
+            "[class*='opbox-listing'] article"
         )
+
         for card in cards[:50]:
             try:
-                title_el = await card.query_selector("h2, h3, [class*='title']")
-                title = await title_el.inner_text() if title_el else ""
+                # Title from h2
+                title_el = await card.query_selector("h2")
+                title = (await title_el.inner_text()).strip() if title_el else ""
+                if not title:
+                    continue
 
-                price_el = await card.query_selector("[class*='price']")
-                price_text = await price_el.inner_text() if price_el else "0"
-                price = self._parse_price(price_text)
-
-                link_el = await card.query_selector("a")
+                # Link to offer
+                link_el = await card.query_selector("a[href*='oferta']")
+                if not link_el:
+                    link_el = await card.query_selector("a[href]")
                 href = await link_el.get_attribute("href") if link_el else ""
                 listing_url = (
-                    href if href and href.startswith("http") else f"{self.base_url}{href}"
+                    href if href and href.startswith("http")
+                    else f"{self.base_url}{href}"
                 )
 
+                # Source ID from URL
+                source_id = ""
+                if href:
+                    # Allegro URLs end with the item ID
+                    parts = href.rstrip("/").split("-")
+                    if parts:
+                        source_id = parts[-1]
+
+                # Price from aria-label containing "cena"
+                price = 0.0
+                price_el = await card.query_selector("[aria-label*='cena']")
+                if price_el:
+                    price_text = (await price_el.inner_text()).strip()
+                    price = self._parse_price(price_text)
+
+                # Image
+                photos: list[str] = []
                 img_el = await card.query_selector("img")
-                photo_url = await img_el.get_attribute("src") if img_el else ""
-                photos = [photo_url] if photo_url else []
+                if img_el:
+                    src = await img_el.get_attribute("src")
+                    if src and not src.startswith("data:"):
+                        photos.append(src)
 
                 results.append(
                     RawListing(
-                        source_id=(
-                            href.split("/")[-1].split(".")[0]
-                            if href
-                            else str(len(results))
-                        ),
+                        source_id=source_id,
                         source=self.source_name,
                         title=title,
                         description="",
@@ -68,15 +87,19 @@ class AllegroAdapter(PlaywrightBaseAdapter):
 
     @staticmethod
     def _parse_price(text: str) -> float:
-        cleaned = "".join(c for c in text if c.isdigit() or c in ".,")
+        if not text:
+            return 0.0
+        cleaned = text.lower().replace("zł", "").strip()
+        cleaned = re.sub(r"[^\d.,]", "", cleaned)
         if not cleaned:
             return 0.0
+        # Polish format: 1 250,00 or 1.250,00
         if "," in cleaned and "." in cleaned:
             if cleaned.rfind(",") > cleaned.rfind("."):
                 cleaned = cleaned.replace(".", "").replace(",", ".")
             else:
                 cleaned = cleaned.replace(",", "")
-        else:
+        elif "," in cleaned:
             cleaned = cleaned.replace(",", ".")
         try:
             return float(cleaned)

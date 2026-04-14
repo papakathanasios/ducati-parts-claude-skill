@@ -1,4 +1,5 @@
 import asyncio
+import re
 from decimal import Decimal, ROUND_HALF_UP
 from datetime import datetime
 
@@ -11,6 +12,19 @@ from src.core.types import (
     ConditionScore, CompatibilityConfidence,
     Listing, RawListing, SearchFilters,
 )
+
+_WORD_SPLIT = re.compile(r"[^a-z0-9]+")
+
+
+def _is_relevant(title: str, description: str, query: str) -> bool:
+    """Check if a listing is relevant to the search query.
+
+    A listing must have at least one significant query word (>= 3 chars)
+    present in either the title or description.
+    """
+    query_words = {w for w in _WORD_SPLIT.split(query.lower()) if len(w) >= 3}
+    listing_text = f"{title} {description}".lower()
+    return any(word in listing_text for word in query_words)
 
 
 class SearchOrchestrator:
@@ -47,6 +61,8 @@ class SearchOrchestrator:
 
         listings: list[Listing] = []
         for raw in raw_results:
+            if not _is_relevant(raw.title, raw.description, filters.query):
+                continue
             if self.condition_filter.should_exclude(raw.title, raw.description):
                 continue
             normalized = self.condition_filter.normalize_label(raw.condition_label)

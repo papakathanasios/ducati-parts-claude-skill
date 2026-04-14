@@ -81,11 +81,21 @@ class OlxBgAdapter(PlaywrightBaseAdapter):
                 # Title
                 title_el = await card.query_selector("h6")
                 title = (await title_el.inner_text()).strip() if title_el else ""
+                if not title:
+                    continue
 
                 # Link and listing URL
                 link_el = await card.query_selector("a")
                 href = await link_el.get_attribute("href") if link_el else ""
                 listing_url = href if href and href.startswith("http") else f"{self.base_url}{href}"
+
+                # Skip OLX "last resort" results (irrelevant fallback listings)
+                if "extended_search_no_results_last_resort" in listing_url:
+                    continue
+
+                # Skip OLX cross-site redirects (autovit, otomoto, storia, etc.)
+                if href and not href.startswith("/") and self.base_url not in href:
+                    continue
 
                 # Source ID from URL or data attribute
                 source_id = ""

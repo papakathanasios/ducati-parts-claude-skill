@@ -15,7 +15,7 @@ class SubitoAdapter(PlaywrightBaseAdapter):
 
     def _build_search_url(self, query: str) -> str:
         encoded_query = quote_plus(query)
-        return f"{self.base_url}/annunci-italia/vendita/usato/?q={encoded_query}"
+        return f"{self.base_url}/annunci-italia/vendita/accessori-moto/?q={encoded_query}"
 
     def _parse_price(self, price_text: str) -> float:
         if not price_text:
@@ -27,9 +27,7 @@ class SubitoAdapter(PlaywrightBaseAdapter):
             return 0.0
 
         # Italian number format: dots as thousands separator, comma as decimal
-        # Examples: "1.250,00" -> 1250.00, "25,50" -> 25.50, "1.250" -> 1250.0
         if ',' in cleaned:
-            # Has decimal comma
             parts = cleaned.split(',')
             integer_part = parts[0].replace('.', '')
             decimal_part = parts[1] if len(parts) > 1 else '0'
@@ -38,7 +36,6 @@ class SubitoAdapter(PlaywrightBaseAdapter):
             except ValueError:
                 return 0.0
         elif '.' in cleaned:
-            # Dots only - thousands separator in Italian format
             integer_part = cleaned.replace('.', '')
             try:
                 return float(integer_part)
@@ -53,12 +50,12 @@ class SubitoAdapter(PlaywrightBaseAdapter):
     async def _extract_listings(self, page: Page, query: str) -> list[RawListing]:
         results: list[RawListing] = []
 
-        # Primary selector for item cards, with fallback
-        cards = await page.query_selector_all("[class*='ItemCard']")
-        if not cards:
-            cards = await page.query_selector_all(".items__item")
+        # Current Subito DOM: article cards with module-based class names
+        cards = await page.query_selector_all(
+            "article[class*='index-module_card']"
+        )
 
-        for card in cards:
+        for card in cards[:50]:
             try:
                 listing = await self._parse_card(card)
                 if listing:
@@ -69,50 +66,40 @@ class SubitoAdapter(PlaywrightBaseAdapter):
         return results
 
     async def _parse_card(self, card) -> RawListing | None:
-        # Extract listing URL
-        listing_url = await card.get_attribute("href")
-        if not listing_url:
-            link_el = await card.query_selector("a[href]")
-            if link_el:
-                listing_url = await link_el.get_attribute("href")
-
-        if not listing_url:
-            return None
-
-        if listing_url.startswith("/"):
-            listing_url = f"{self.base_url}{listing_url}"
-
-        # Generate source_id from URL
-        source_id = hashlib.md5(listing_url.encode()).hexdigest()[:12]
-
-        # Extract title
-        title = ""
-        for selector in ["[class*='title']", "[class*='subject']", "h2", "h3"]:
-            title_el = await card.query_selector(selector)
-            if title_el:
-                title = (await title_el.inner_text()).strip()
-                if title:
-                    break
-
+        # Title from h3
+        title_el = await card.query_selector("h3")
+        title = (await title_el.inner_text()).strip() if title_el else ""
         if not title:
             return None
 
-        # Extract price
-        price = 0.0
-        for selector in ["[class*='price']", "[class*='Price']", "p"]:
-            price_el = await card.query_selector(selector)
-            if price_el:
-                price_text = (await price_el.inner_text()).strip()
-                price = self._parse_price(price_text)
-                if price > 0:
-                    break
+        # Link
+        link_el = await card.query_selector("a[class*='index-module_link']")
+        if not link_el:
+            link_el = await card.query_selector("a[href]")
+        listing_url = ""
+        if link_el:
+            listing_url = await link_el.get_attribute("href") or ""
+        if not listing_url:
+            return None
+        if listing_url.startswith("/"):
+            listing_url = f"{self.base_url}{listing_url}"
 
-        # Extract image
+        # Source ID from URL
+        source_id = hashlib.md5(listing_url.encode()).hexdigest()[:12]
+
+        # Price from p with price class
+        price = 0.0
+        price_el = await card.query_selector("p[class*='price']")
+        if price_el:
+            price_text = (await price_el.inner_text()).strip()
+            price = self._parse_price(price_text)
+
+        # Image
         photos: list[str] = []
         img_el = await card.query_selector("img[src]")
         if img_el:
             img_url = await img_el.get_attribute("src")
-            if img_url:
+            if img_url and not img_url.startswith("data:"):
                 photos.append(img_url)
 
         return RawListing(
