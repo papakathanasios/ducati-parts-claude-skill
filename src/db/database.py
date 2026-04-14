@@ -140,6 +140,15 @@ class Database:
         conn.commit()
         conn.close()
 
+    def update_watch_budget(self, watch_id: int, max_total_price: float) -> None:
+        conn = self._connect()
+        conn.execute(
+            "UPDATE Watch SET max_total_price = ? WHERE id = ?",
+            (max_total_price, watch_id),
+        )
+        conn.commit()
+        conn.close()
+
     def update_watch_last_checked(self, watch_id: int) -> None:
         conn = self._connect()
         conn.execute(
