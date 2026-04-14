@@ -1,0 +1,49 @@
+bike:
+  default_model: "Multistrada 1260 Enduro"
+  year_range: [2019, 2021]
+  also_compatible:
+    - "Multistrada 1260"
+    - "Multistrada 1260 S"
+    - "Multistrada 1260 Pikes Peak"
+
+shipping:
+  destination_country: "GR"
+  destination_postal: "15562"
+  destination_city: "Athens"
+  shipping_ratio_warning: 0.5
+
+search:
+  default_tiers: [1, 2]
+  max_results_per_source: 50
+  currency_display: "EUR"
+
+condition:
+  min_score: "red"
+  photo_required: false
+
+watch:
+  check_interval_hours: 4
+  stale_listing_days: 30
+  notification: "macos"
+
+tiers:
+  1:
+    - olx_bg
+    - olx_ro
+    - allegro_pl
+    - jofogas_hu
+    - bazos_cz
+    - bazos_sk
+    - njuskalo_hr
+    - bolha_si
+    - facebook_eastern_eu
+  2:
+    - subito_it
+    - ebay_eu
+    - moto_breakers
+  3:
+    - kleinanzeigen_de
+    - leboncoin_fr
+    - wallapop_es
+    - facebook_western_eu
+    - uk_sites
