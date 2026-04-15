@@ -41,3 +41,35 @@ class TestGetSelectors:
     def test_base_returns_empty_dict(self):
         adapter = StubDiagnosticAdapter()
         assert adapter._get_selectors() == {}
+
+
+class TestSmokeTestCLI:
+    """Test that the smoke test script accepts the new CLI flags."""
+
+    def test_argparse_accepts_diagnose_flag(self):
+        import test_scripts.smoke_test_live as smoke
+
+        parser = smoke.build_parser()
+        args = parser.parse_args(["--diagnose"])
+        assert args.diagnose is True
+
+    def test_argparse_accepts_report_flag(self):
+        import test_scripts.smoke_test_live as smoke
+
+        parser = smoke.build_parser()
+        args = parser.parse_args(["--report"])
+        assert args.report is True
+
+    def test_argparse_accepts_query_flag(self):
+        import test_scripts.smoke_test_live as smoke
+
+        parser = smoke.build_parser()
+        args = parser.parse_args(["--query", "exhaust pipe"])
+        assert args.query == "exhaust pipe"
+
+    def test_default_query_is_ducati_multistrada(self):
+        import test_scripts.smoke_test_live as smoke
+
+        parser = smoke.build_parser()
+        args = parser.parse_args([])
+        assert args.query == "Ducati Multistrada"
