@@ -26,10 +26,8 @@ class MaleDucatiAdapter(PlaywrightBaseAdapter):
 
     async def _extract_listings(self, page: Page, query: str) -> list[RawListing]:
         results: list[RawListing] = []
-        cards = await page.query_selector_all(
-            ".product-item, .product-card, [class*='product'], "
-            ".item, article, .tcs-item"
-        )
+        # Search results are in .termek_sor_lista_tarto containers
+        cards = await page.query_selector_all(".termek_sor_lista_tarto")
 
         seen_urls: set[str] = set()
         for card in cards[:50]:
@@ -42,9 +40,9 @@ class MaleDucatiAdapter(PlaywrightBaseAdapter):
         return results
 
     async def _parse_card(self, card, seen_urls: set) -> RawListing | None:
+        # Product name link
         title_el = await card.query_selector(
-            "a[href*='/tcs'], a[href*='maleducati'], h2 a, h3 a, "
-            ".product-title a, .product-name a"
+            "a.blokk_lista_termek_nev_link, .termek_sor_lista_nev a"
         )
         if not title_el:
             return None
@@ -61,19 +59,22 @@ class MaleDucatiAdapter(PlaywrightBaseAdapter):
         seen_urls.add(href)
         source_id = hashlib.md5(listing_url.encode()).hexdigest()[:12]
 
+        # Price (uses &nbsp; separated values like "27 000 Ft")
         price = 0.0
-        price_el = await card.query_selector("[class*='price'], .price, .product-price")
+        price_el = await card.query_selector(
+            ".blokk_lista_uj_ar, .blokk_lista_uj_ar_2, .termek_sor_lista_ar"
+        )
         if price_el:
             price_text = (await price_el.inner_text()).strip()
             price = self._parse_price(price_text)
 
         photos: list[str] = []
-        img_el = await card.query_selector("img[src], img[data-src]")
+        img_el = await card.query_selector("img.lista_kep, img[src]")
         if img_el:
-            src = await img_el.get_attribute("data-src") or await img_el.get_attribute("src") or ""
+            src = await img_el.get_attribute("src") or ""
             if src and not src.startswith("data:"):
                 if not src.startswith("http"):
-                    src = f"{self.base_url}{src}"
+                    src = f"{self.base_url}/{src}"
                 photos.append(src)
 
         return RawListing(
@@ -89,6 +90,31 @@ class MaleDucatiAdapter(PlaywrightBaseAdapter):
             photos=photos,
             listing_url=listing_url,
         )
+
+    def _get_selectors(self) -> dict[str, list[str]]:
+        return {
+            "product_cards": [
+                ".product-item",
+                ".product-card",
+                "[class*='product']",
+                ".item",
+                "article",
+                ".tcs-item",
+            ],
+            "title": [
+                "a[href*='/tcs']",
+                "a[href*='maleducati']",
+                "h2 a",
+                "h3 a",
+                ".product-title a",
+                ".product-name a",
+            ],
+            "price": [
+                "[class*='price']",
+                ".price",
+                ".product-price",
+            ],
+        }
 
     @staticmethod
     def _parse_price(text: str) -> float:

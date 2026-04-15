@@ -22,37 +22,12 @@ class BMotorAdapter(PlaywrightBaseAdapter):
     base_url = "https://www.bmotor.hu"
 
     def _build_search_url(self, query: str) -> str:
-        # ShopRenter uses JS search; navigate to home and use the search input
-        return self.base_url
+        return f"{self.base_url}/index.php?route=product/list&keyword={quote_plus(query)}"
 
     async def _extract_listings(self, page: Page, query: str) -> list[RawListing]:
-        # ShopRenter search is AJAX-based — fill the search input and trigger it
-        search_input = await page.query_selector(
-            "input.disableAutocomplete[type='text'], "
-            "input[placeholder*='keres'], #search input[type='text']"
-        )
-        if search_input:
-            await search_input.fill(query)
-            search_btn = await page.query_selector("#search_btn, button.btn:has(i.fa-search)")
-            if search_btn:
-                await search_btn.click()
-            else:
-                await search_input.press("Enter")
-            # Wait for AJAX results
-            try:
-                await page.wait_for_selector(
-                    ".search-results a, #results a, .product-item",
-                    timeout=10000,
-                )
-            except Exception:
-                pass
-
         results: list[RawListing] = []
-        # Search results appear in the #results div or as product items
-        cards = await page.query_selector_all(
-            "#results a[href], .search-results a[href], "
-            ".product-item, .product-card"
-        )
+        # ShopRenter product list: each product is in a div with class list_position_N
+        cards = await page.query_selector_all("div[class*='list_position_']")
 
         seen_urls: set[str] = set()
         for card in cards[:50]:
@@ -65,11 +40,8 @@ class BMotorAdapter(PlaywrightBaseAdapter):
         return results
 
     async def _parse_card(self, card, seen_urls: set) -> RawListing | None:
-        # Look for title link
-        title_el = await card.query_selector(
-            "a[href*='/ducati'], a[href*='/product'], h2 a, h3 a, "
-            ".product-title a, .product-name a, a.product-link"
-        )
+        # Title link: a.list-productname-link
+        title_el = await card.query_selector("a.list-productname-link")
         if not title_el:
             return None
 
@@ -85,9 +57,9 @@ class BMotorAdapter(PlaywrightBaseAdapter):
         seen_urls.add(href)
         source_id = hashlib.md5(listing_url.encode()).hexdigest()[:12]
 
-        # Price (HUF format: 25 000 Ft or 25.000 Ft)
+        # Price (HUF format: 27.000 Ft)
         price = 0.0
-        price_el = await card.query_selector("[class*='price'], .price, .product-price")
+        price_el = await card.query_selector(".list_price, .list_prouctprice .list_price")
         if price_el:
             price_text = (await price_el.inner_text()).strip()
             price = self._parse_price(price_text)
@@ -114,6 +86,19 @@ class BMotorAdapter(PlaywrightBaseAdapter):
             photos=photos,
             listing_url=listing_url,
         )
+
+    def _get_selectors(self) -> dict[str, list[str]]:
+        return {
+            "product_cards": [
+                "div[class*='list_position_']",
+            ],
+            "title": [
+                "a.list-productname-link",
+            ],
+            "price": [
+                ".list_price",
+            ],
+        }
 
     @staticmethod
     def _parse_price(text: str) -> float:

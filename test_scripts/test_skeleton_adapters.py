@@ -16,7 +16,6 @@ from src.adapters.jofogas import JofogasAdapter
 from src.adapters.bazos import BazosCzAdapter, BazosSkAdapter
 from src.adapters.njuskalo import NjuskaloAdapter
 from src.adapters.bolha import BolhaAdapter
-from src.adapters.facebook import FacebookMarketplaceAdapter
 from src.adapters.moto_breakers import MotoBreakersAdapter
 
 
@@ -32,7 +31,6 @@ from src.adapters.moto_breakers import MotoBreakersAdapter
     (BazosSkAdapter, "bazos_sk", "SK", "EUR", "bazos.sk"),
     (NjuskaloAdapter, "njuskalo", "HR", "EUR", "njuskalo.hr"),
     (BolhaAdapter, "bolha", "SI", "EUR", "bolha.com"),
-    (FacebookMarketplaceAdapter, "facebook_marketplace", "EU", "EUR", "facebook.com"),
     (MotoBreakersAdapter, "moto_breakers", "GB", "GBP", "moto-breakers.co.uk"),
 ])
 def test_adapter_properties(adapter_cls, source_name, country, currency, domain):
@@ -55,7 +53,6 @@ def test_adapter_properties(adapter_cls, source_name, country, currency, domain)
     (BazosSkAdapter, "bazos.sk"),
     (NjuskaloAdapter, "njuskalo.hr"),
     (BolhaAdapter, "bolha.com"),
-    (FacebookMarketplaceAdapter, "facebook.com"),
     (MotoBreakersAdapter, "moto-breakers.co.uk"),
 ])
 def test_adapter_search_url(adapter_cls, domain):
@@ -70,7 +67,7 @@ def test_adapter_search_url(adapter_cls, domain):
 @pytest.mark.parametrize("adapter_cls", [
     KleinanzeigenAdapter, LeboncoinAdapter, WallapopAdapter,
     AllegroAdapter, JofogasAdapter, BazosCzAdapter, BazosSkAdapter,
-    NjuskaloAdapter, BolhaAdapter, FacebookMarketplaceAdapter,
+    NjuskaloAdapter, BolhaAdapter,
     MotoBreakersAdapter,
 ])
 class TestParsePrice:

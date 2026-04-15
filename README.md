@@ -21,7 +21,7 @@ OLX Bulgaria, OLX Romania, OLX Poland, Allegro (PL), Jofogas (HU), Bazos (CZ/SK)
 Subito.it (IT), eBay EU (IT/DE/FR/ES/GB), Moto Breakers (GB)
 
 ### Tier 3 -- Expensive Western EU (opt-in)
-Kleinanzeigen (DE), Leboncoin (FR), Wallapop (ES), Facebook Marketplace
+Kleinanzeigen (DE), Leboncoin (FR), Wallapop (ES)
 
 ## Setup
 

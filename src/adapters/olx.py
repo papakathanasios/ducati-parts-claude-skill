@@ -78,14 +78,14 @@ class OlxBgAdapter(PlaywrightBaseAdapter):
 
         for card in cards:
             try:
-                # Title
-                title_el = await card.query_selector("h6")
+                # Title (OLX uses div[data-cy='ad-card-title'] containing an <a>)
+                title_el = await card.query_selector("[data-cy='ad-card-title'] a, [data-testid='ad-card-title'] a, h6")
                 title = (await title_el.inner_text()).strip() if title_el else ""
                 if not title:
                     continue
 
                 # Link and listing URL
-                link_el = await card.query_selector("a")
+                link_el = title_el or await card.query_selector("a")
                 href = await link_el.get_attribute("href") if link_el else ""
                 listing_url = href if href and href.startswith("http") else f"{self.base_url}{href}"
 

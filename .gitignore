@@ -6,3 +6,16 @@ data/ducati_parts.db
 reports/*.html
 .pytest_cache/
 .browser_data/
+
+# macOS
+.DS_Store
+
+# Generated output
+graphify-out/
+diagnostics/
+
+# Images
+*.png
+*.jpg
+*.jpeg
+*.gif

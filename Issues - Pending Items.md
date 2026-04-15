@@ -4,9 +4,7 @@
 
 ### High Priority
 
-1. **Facebook adapter fragility** - Facebook actively blocks automation. The Facebook adapter will require periodic maintenance as selectors and anti-bot measures change. Consider email notification fallback from Facebook Groups.
-
-2. **CSS selector validation** - All Playwright-based adapters have initial CSS selectors that need validation against live sites. Run `test_scripts/smoke_test_live.py` to detect selector rot.
+1. **CSS selector validation** - All Playwright-based adapters have initial CSS selectors that need validation against live sites. Run `test_scripts/smoke_test_live.py` to detect selector rot.
 
 6. **JS-heavy specialist adapters** - BMotor (HU), MaleDucati (HU), and some PrestaShop adapters (FR/ES) return empty results because their search is AJAX/client-side. BMotor uses ShopRenter with AJAX search; MaleDucati renders results client-side. These work through Playwright but may need longer timeouts or explicit JS interaction. Current 30s timeout in smoke test is sometimes too short.
 

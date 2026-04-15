@@ -6,6 +6,8 @@ from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from src.adapters.playwright_base import PlaywrightBaseAdapter
+from src.adapters.bmotor import BMotorAdapter
+from src.adapters.maleducati import MaleDucatiAdapter
 from src.core.types import RawListing, SearchFilters
 
 
@@ -101,3 +103,20 @@ class TestSelectorTesterCLI:
         args = parser.parse_args([])
         assert args.url is None
         assert args.adapter is None
+
+
+class TestAdapterGetSelectors:
+    def test_bmotor_returns_selectors(self):
+        adapter = BMotorAdapter()
+        selectors = adapter._get_selectors()
+        assert isinstance(selectors, dict)
+        assert len(selectors) > 0
+        assert "product_cards" in selectors
+        assert "search_input" in selectors
+
+    def test_maleducati_returns_selectors(self):
+        adapter = MaleDucatiAdapter()
+        selectors = adapter._get_selectors()
+        assert isinstance(selectors, dict)
+        assert len(selectors) > 0
+        assert "product_cards" in selectors
