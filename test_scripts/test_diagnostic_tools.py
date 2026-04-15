@@ -73,3 +73,31 @@ class TestSmokeTestCLI:
         parser = smoke.build_parser()
         args = parser.parse_args([])
         assert args.query == "Ducati Multistrada"
+
+
+class TestSelectorTesterCLI:
+    """Test that selector_tester.py accepts expected CLI flags."""
+
+    def test_argparse_accepts_url_and_selector(self):
+        import test_scripts.selector_tester as tester
+
+        parser = tester.build_parser()
+        args = parser.parse_args(["--url", "https://example.com", "--selector", ".product"])
+        assert args.url == "https://example.com"
+        assert args.selector == ".product"
+
+    def test_argparse_accepts_adapter_mode(self):
+        import test_scripts.selector_tester as tester
+
+        parser = tester.build_parser()
+        args = parser.parse_args(["--adapter", "bmotor", "--query", "Multistrada"])
+        assert args.adapter == "bmotor"
+        assert args.query == "Multistrada"
+
+    def test_argparse_requires_url_or_adapter(self):
+        import test_scripts.selector_tester as tester
+
+        parser = tester.build_parser()
+        args = parser.parse_args([])
+        assert args.url is None
+        assert args.adapter is None
