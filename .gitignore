@@ -5,3 +5,4 @@ __pycache__/
 data/ducati_parts.db
 reports/*.html
 .pytest_cache/
+.browser_data/

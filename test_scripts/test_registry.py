@@ -5,7 +5,7 @@ from src.adapters.registry import build_adapter_registry
 
 def test_registry_returns_adapters():
     adapters = build_adapter_registry()
-    assert len(adapters) >= 4  # OLX BG/RO/PL + Subito
+    assert len(adapters) >= 35  # classifieds + 23 specialist adapters
     assert "olx_bg" in adapters
     assert "olx_ro" in adapters
     assert "olx_pl" in adapters

@@ -1,10 +1,13 @@
 import asyncio
 import os
 from abc import abstractmethod
+from pathlib import Path
 from playwright.async_api import async_playwright, Page, Browser, BrowserContext
 from playwright_stealth import Stealth
 from src.adapters.base import BaseAdapter, AdapterHealthCheck
 from src.core.types import RawListing, SearchFilters
+
+_PROJECT_ROOT = Path(__file__).parent.parent.parent
 
 _stealth = Stealth()
 
@@ -77,6 +80,12 @@ class PlaywrightBaseAdapter(BaseAdapter):
     async def _new_context(self) -> BrowserContext:
         browser_data_dir = os.environ.get("BROWSER_DATA_DIR")
         if browser_data_dir:
+            # Resolve relative paths against project root
+            data_path = Path(browser_data_dir)
+            if not data_path.is_absolute():
+                data_path = _PROJECT_ROOT / data_path
+            data_path.mkdir(parents=True, exist_ok=True)
+            browser_data_dir = str(data_path)
             # Reuse persistent context with real Chrome cookies to bypass WAF
             if self._persistent_context is None:
                 if self._pw is None:
