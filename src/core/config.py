@@ -1,3 +1,4 @@
+import os
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -71,8 +72,13 @@ def load_config(config_path: str) -> AppConfig:
         adapter_timeout_seconds=search_data.get("adapter_timeout_seconds", 30),
     )
 
+    bike_data = raw["bike"]
+    bike_model_env = os.environ.get("BIKE_MODEL")
+    if bike_model_env:
+        bike_data["default_model"] = bike_model_env
+
     return AppConfig(
-        bike=BikeConfig(**raw["bike"]),
+        bike=BikeConfig(**bike_data),
         shipping=ShippingConfig(**raw["shipping"]),
         search=search_config,
         condition=ConditionConfig(**raw["condition"]),

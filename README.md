@@ -1,6 +1,6 @@
 # Ducati Parts Finder
 
-A Claude Code skill that finds used Ducati Multistrada 1260 Enduro parts across 15+ European marketplaces, prioritizing cheap Eastern EU sources for cost arbitrage.
+A Claude Code skill that finds used Ducati parts across 15+ European marketplaces, prioritizing cheap Eastern EU sources for cost arbitrage. The target bike model is configurable via the `BIKE_MODEL` environment variable (defaults to Multistrada 1260 Enduro).
 
 ## What It Does
 
@@ -43,13 +43,17 @@ playwright install chromium
 
 ### Configuration
 
-1. Copy `.env.example` to `.env` and add your eBay API credentials (optional -- other adapters work without it):
+1. Copy `.env.example` to `.env` and configure:
    ```
+   # Required: which Ducati model to search for
+   BIKE_MODEL=Multistrada 1260 Enduro
+
+   # Optional: eBay API credentials (other adapters work without it)
    EBAY_APP_ID=your_app_id
    EBAY_CERT_ID=your_cert_id
    ```
 
-2. Edit `config/config.yaml` to adjust bike model, shipping destination, tier preferences, or watch interval.
+2. Edit `config/config.yaml` to adjust shipping destination, tier preferences, or watch interval. The `BIKE_MODEL` env var overrides the `bike.default_model` value in the YAML config.
 
 ## Usage
 
