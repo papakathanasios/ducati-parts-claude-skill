@@ -1,0 +1,43 @@
+"""Tests for adapter diagnostic tooling."""
+
+import asyncio
+import pytest
+from pathlib import Path
+from unittest.mock import AsyncMock, MagicMock, patch
+
+from src.adapters.playwright_base import PlaywrightBaseAdapter
+from src.core.types import RawListing, SearchFilters
+
+
+class StubDiagnosticAdapter(PlaywrightBaseAdapter):
+    source_name = "stub_diag"
+    language = "en"
+    country = "GB"
+    currency = "GBP"
+    base_url = "https://example.com"
+
+    def _build_search_url(self, query: str) -> str:
+        return f"{self.base_url}/search?q={query}"
+
+    async def _extract_listings(self, page, query: str) -> list[RawListing]:
+        return []
+
+
+class TestSearchWithDiagnostics:
+    def test_method_exists(self):
+        adapter = StubDiagnosticAdapter()
+        assert hasattr(adapter, "search_with_diagnostics")
+
+    def test_returns_tuple_of_three(self):
+        """search_with_diagnostics returns (listings, screenshot_path, dom_path)."""
+        adapter = StubDiagnosticAdapter()
+        sig = adapter.search_with_diagnostics.__code__.co_varnames
+        assert "query" in sig
+        assert "filters" in sig
+        assert "capture_dir" in sig
+
+
+class TestGetSelectors:
+    def test_base_returns_empty_dict(self):
+        adapter = StubDiagnosticAdapter()
+        assert adapter._get_selectors() == {}

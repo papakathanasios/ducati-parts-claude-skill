@@ -154,6 +154,69 @@ class PlaywrightBaseAdapter(BaseAdapter):
             if context is not self._persistent_context:
                 await context.close()
 
+    async def search_with_diagnostics(
+        self, query: str, filters: SearchFilters, capture_dir: Path,
+    ) -> tuple[list[RawListing], Path | None, Path | None]:
+        """Run search and capture screenshot + DOM snapshot before closing the page."""
+        context = await self._new_context()
+        page = await context.new_page()
+        await _stealth.apply_stealth_async(page)
+        screenshot_path: Path | None = None
+        dom_path: Path | None = None
+        try:
+            url = self._build_search_url(query)
+            await page.goto(url, wait_until="domcontentloaded", timeout=30000)
+            await asyncio.sleep(2)
+            await self._dismiss_cookies(page)
+            await asyncio.sleep(2)
+            results = await self._extract_listings(page, query)
+
+            # Capture diagnostics before closing
+            capture_dir.mkdir(parents=True, exist_ok=True)
+            screenshots_dir = capture_dir / "screenshots"
+            screenshots_dir.mkdir(parents=True, exist_ok=True)
+            dom_dir = capture_dir / "dom"
+            dom_dir.mkdir(parents=True, exist_ok=True)
+
+            screenshot_path = screenshots_dir / f"{self.source_name}.png"
+            await page.screenshot(path=str(screenshot_path), full_page=True)
+
+            dom_path = dom_dir / f"{self.source_name}.html"
+            content = await page.content()
+            dom_path.write_text(content, encoding="utf-8")
+
+            return results, screenshot_path, dom_path
+        except Exception:
+            # Still try to capture what we can on error
+            try:
+                capture_dir.mkdir(parents=True, exist_ok=True)
+                screenshots_dir = capture_dir / "screenshots"
+                screenshots_dir.mkdir(parents=True, exist_ok=True)
+                screenshot_path = screenshots_dir / f"{self.source_name}.png"
+                await page.screenshot(path=str(screenshot_path), full_page=True)
+            except Exception:
+                pass
+            try:
+                dom_dir = capture_dir / "dom"
+                dom_dir.mkdir(parents=True, exist_ok=True)
+                dom_path = dom_dir / f"{self.source_name}.html"
+                content = await page.content()
+                dom_path.write_text(content, encoding="utf-8")
+            except Exception:
+                pass
+            raise
+        finally:
+            await page.close()
+            if context is not self._persistent_context:
+                await context.close()
+
+    def _get_selectors(self) -> dict[str, list[str]]:
+        """Return CSS selectors used by this adapter, keyed by purpose.
+
+        Override in subclasses to enable per-selector diagnostic reporting.
+        """
+        return {}
+
     async def health_check(self) -> AdapterHealthCheck:
         try:
             context = await self._new_context()
