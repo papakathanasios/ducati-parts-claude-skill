@@ -22,7 +22,7 @@ class ColchesterBreakersAdapter(PlaywrightBaseAdapter):
     base_url = "https://www.colchesterbreakers.co.uk"
 
     def _build_search_url(self, query: str) -> str:
-        return f"{self.base_url}/parts/?s={quote_plus(query)}"
+        return f"{self.base_url}/?s={quote_plus(query)}&post_type=product"
 
     async def _extract_listings(self, page: Page, query: str) -> list[RawListing]:
         results: list[RawListing] = []

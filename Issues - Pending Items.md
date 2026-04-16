@@ -8,7 +8,7 @@
 
 ### Medium Priority
 
-2. **Site access blocked** - Several adapters are blocked by WAF/bot detection: allegro (tiny DOM, bot block), ital_allparts (Cloudflare), motoye (403 Forbidden), forza_moto (site down/redirect).
+2. **Site access blocked** - Several adapters are blocked by WAF/bot detection: allegro (tiny DOM, bot block), ital_allparts (Cloudflare), motoye (403 Forbidden), forza_moto (404, site down), leboncoin (intermittent DataDome captcha).
 
 3. **Shipping estimate refinement** - Current estimates are rough ranges. Could be improved with actual shipping calculator APIs from major carriers (DHL, DPD, etc.).
 
@@ -22,11 +22,11 @@
 
 ### Low Priority
 
-8. **Adapters with no "Ducati Multistrada" results** - jofogas, motodesguace_ferrer, desguaces_pedros, colchester_breakers, fresiamoto, ducatiparts_cz return empty for this specific query. May work with other queries.
+8. **Adapters with no "Ducati Multistrada" results** - jofogas, motodesguace_ferrer, desguaces_pedros, colchester_breakers, ducatiparts_cz return empty for this specific query. May work with other queries.
 
 ## Completed
 
-12. **CSS selector validation and fix sweep** - Fixed 9 adapters with broken selectors/URLs: OLX (bg/ro/pl) title selector, BMotor search URL + ShopRenter selectors, MaleDucati Hungarian CMS selectors, Dezosmoto PrestaShop 1.6 selectors, Speckmoto Magento URL + selectors, DucatiMondo Magento URL + selectors, MotorradteileHannover JTL-Shop search param, DucStore ePages URL + selectors. Smoke test improved from 15/36 OK to 20/36 OK. (2026-04-16)
+12. **CSS selector validation and fix sweep** - Fixed 12 adapters with broken selectors/URLs: OLX (bg/ro/pl) title selector, BMotor search URL + ShopRenter selectors, MaleDucati Hungarian CMS selectors, Dezosmoto PrestaShop 1.6 selectors, Speckmoto Magento URL + selectors, DucatiMondo Magento URL + selectors, MotorradteileHannover JTL-Shop search param, DucStore ePages URL + selectors, Fresiamoto Storeden URL + selectors, Colchester Breakers search URL. Smoke test improved from 15/36 OK to 21/36 OK. Remaining EMPTY adapters confirmed as site-blocked (5) or genuinely no results (5). (2026-04-16)
 
 13. **Diagnostic tooling** - Added search_with_diagnostics(), smoke test --diagnose/--report flags, selector_tester.py tool, Jinja2 HTML diagnostic report. (2026-04-15)
 
