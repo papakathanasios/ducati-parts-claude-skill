@@ -98,6 +98,10 @@ class BMotorAdapter(PlaywrightBaseAdapter):
             "price": [
                 ".list_price",
             ],
+            "search_input": [
+                "input#keyword",
+                "input[name='keyword']",
+            ],
         }
 
     @staticmethod

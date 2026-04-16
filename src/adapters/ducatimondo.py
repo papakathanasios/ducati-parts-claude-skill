@@ -1,6 +1,6 @@
 """Ducati Mondo adapter – UK Ducati specialist (ducatimondo.co.uk).
 
-Search via /store/?s=QUERY&post_type=product.
+Magento site. Search via /store/catalogsearch/result/?q=QUERY.
 """
 
 import re
@@ -21,11 +21,14 @@ class DucatiMondoAdapter(PlaywrightBaseAdapter):
     base_url = "https://www.ducatimondo.co.uk"
 
     def _build_search_url(self, query: str) -> str:
-        return f"{self.base_url}/store/?s={quote_plus(query)}&post_type=product"
+        return f"{self.base_url}/store/catalogsearch/result/?q={quote_plus(query)}"
 
     async def _extract_listings(self, page: Page, query: str) -> list[RawListing]:
         results: list[RawListing] = []
-        cards = await page.query_selector_all("li.product, .type-product, .product-card")
+        # Magento 1.x: products in ul.products-list > li or ul.products-grid > li
+        cards = await page.query_selector_all(
+            ".products-list li, .products-grid li, .product-info"
+        )
 
         for card in cards[:50]:
             try:
@@ -37,34 +40,31 @@ class DucatiMondoAdapter(PlaywrightBaseAdapter):
         return results
 
     async def _parse_card(self, card) -> RawListing | None:
-        title_el = await card.query_selector(
-            ".woocommerce-loop-product__title, h2, h3, a.woocommerce-LoopProduct-link"
-        )
+        # Magento 1.x: h2.product-name > a
+        title_el = await card.query_selector(".product-name a, h2 a, a.product-name")
         if not title_el:
             return None
         title = (await title_el.inner_text()).strip()
         if not title:
             return None
 
-        link_el = await card.query_selector("a[href*='/product/'], a[href]")
-        if not link_el:
-            return None
-        listing_url = await link_el.get_attribute("href") or ""
+        listing_url = await title_el.get_attribute("href") or ""
         if not listing_url:
             return None
 
         source_id = hashlib.md5(listing_url.encode()).hexdigest()[:12]
 
         price = 0.0
-        price_el = await card.query_selector(".woocommerce-Price-amount, .price, .amount")
+        # Magento 1.x: .price-box .price, .regular-price .price, .special-price .price
+        price_el = await card.query_selector(".price-box .price, .regular-price .price, .special-price .price")
         if price_el:
             price_text = (await price_el.inner_text()).strip()
             price = self._parse_price(price_text)
 
         photos: list[str] = []
-        img_el = await card.query_selector("img[src], img[data-src]")
+        img_el = await card.query_selector(".product-image img, img[src]")
         if img_el:
-            src = await img_el.get_attribute("data-src") or await img_el.get_attribute("src") or ""
+            src = await img_el.get_attribute("src") or ""
             if src and not src.startswith("data:"):
                 photos.append(src)
 

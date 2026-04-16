@@ -42,7 +42,7 @@ class MaleDucatiAdapter(PlaywrightBaseAdapter):
     async def _parse_card(self, card, seen_urls: set) -> RawListing | None:
         # Product name link
         title_el = await card.query_selector(
-            "a.blokk_lista_termek_nev_link, .termek_sor_lista_nev a"
+            "a.blokk_lista_termek_nev_link, a.termek_sor_lista_nev"
         )
         if not title_el:
             return None
@@ -94,25 +94,16 @@ class MaleDucatiAdapter(PlaywrightBaseAdapter):
     def _get_selectors(self) -> dict[str, list[str]]:
         return {
             "product_cards": [
-                ".product-item",
-                ".product-card",
-                "[class*='product']",
-                ".item",
-                "article",
-                ".tcs-item",
+                ".termek_sor_lista_tarto",
             ],
             "title": [
-                "a[href*='/tcs']",
-                "a[href*='maleducati']",
-                "h2 a",
-                "h3 a",
-                ".product-title a",
-                ".product-name a",
+                "a.blokk_lista_termek_nev_link",
+                "a.termek_sor_lista_nev",
             ],
             "price": [
-                "[class*='price']",
-                ".price",
-                ".product-price",
+                ".blokk_lista_uj_ar",
+                ".blokk_lista_uj_ar_2",
+                ".termek_sor_lista_ar",
             ],
         }
 

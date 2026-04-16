@@ -1,6 +1,6 @@
 """Duc-Store adapter – German Ducati specialist (duc-store.de).
 
-Odoo-based e-commerce. Search via /en_US/shop?search=QUERY.
+ePages shop. Search via ?ViewAction=FacetedSearchProducts&SearchString=QUERY.
 """
 
 import re
@@ -21,17 +21,15 @@ class DucStoreAdapter(PlaywrightBaseAdapter):
     base_url = "https://www.duc-store.de"
 
     def _build_search_url(self, query: str) -> str:
-        return f"{self.base_url}/en_US/shop?search={quote_plus(query)}"
+        return (
+            f"{self.base_url}/?ViewAction=FacetedSearchProducts"
+            f"&ObjectID=5152036&SearchString={quote_plus(query)}"
+        )
 
     async def _extract_listings(self, page: Page, query: str) -> list[RawListing]:
         results: list[RawListing] = []
-        # Odoo product cards
-        cards = await page.query_selector_all(
-            ".oe_product, .o_wsale_product_grid_wrapper form, "
-            "[class*='product'] .card, .oe_product_cart"
-        )
-        if not cards:
-            cards = await page.query_selector_all("form[action*='/shop/cart/update']")
+        # ePages: product cards are div.InfoArea
+        cards = await page.query_selector_all("div.InfoArea")
 
         for card in cards[:50]:
             try:
@@ -43,8 +41,8 @@ class DucStoreAdapter(PlaywrightBaseAdapter):
         return results
 
     async def _parse_card(self, card) -> RawListing | None:
-        # Title and link
-        link_el = await card.query_selector("a[href*='/shop/']")
+        # ePages: h3 > a for title and link
+        link_el = await card.query_selector("h3 a")
         if not link_el:
             return None
 
@@ -53,21 +51,19 @@ class DucStoreAdapter(PlaywrightBaseAdapter):
         if not title or not href:
             return None
 
-        listing_url = href if href.startswith("http") else f"{self.base_url}{href}"
+        listing_url = href if href.startswith("http") else f"{self.base_url}/{href}"
         source_id = hashlib.md5(listing_url.encode()).hexdigest()[:12]
 
-        # Price
+        # Price: span.Price > p.price-value > span[itemprop='price']
         price = 0.0
-        price_el = await card.query_selector(
-            ".oe_currency_value, .product_price .oe_price, [class*='price']"
-        )
+        price_el = await card.query_selector("p.price-value, span.Price")
         if price_el:
             price_text = (await price_el.inner_text()).strip()
             price = self._parse_price(price_text)
 
-        # Image
+        # Image: img.ProductSmallImage
         photos: list[str] = []
-        img_el = await card.query_selector("img[src]")
+        img_el = await card.query_selector("img.ProductSmallImage, img[src]")
         if img_el:
             src = await img_el.get_attribute("src") or ""
             if src and not src.startswith("data:"):

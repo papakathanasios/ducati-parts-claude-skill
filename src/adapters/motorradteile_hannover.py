@@ -22,7 +22,7 @@ class MotorradteileHannoverAdapter(PlaywrightBaseAdapter):
     base_url = "https://motorradteilehannover.de"
 
     def _build_search_url(self, query: str) -> str:
-        return f"{self.base_url}/search/?q={quote_plus(query)}"
+        return f"{self.base_url}/search/?qs={quote_plus(query)}"
 
     async def _extract_listings(self, page: Page, query: str) -> list[RawListing]:
         results: list[RawListing] = []

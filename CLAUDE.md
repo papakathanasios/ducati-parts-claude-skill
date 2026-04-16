@@ -1,5 +1,11 @@
 # Ducati Parts Finder - Project Instructions
 
+## Testing Rules
+
+- NEVER modify or delete existing tests without explicit user approval. If a test fails, it means the code is broken — fix the code, not the test.
+- Tests are the source of truth for expected behavior. When a test fails after a code change, the code change is wrong until proven otherwise.
+- If you believe a test is genuinely outdated or incorrect, explain why to the user and wait for their approval before changing it.
+
 ## Tools
 
 <smokeDiagnostics>

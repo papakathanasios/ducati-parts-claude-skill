@@ -25,10 +25,8 @@ class DezosmotoAdapter(PlaywrightBaseAdapter):
 
     async def _extract_listings(self, page: Page, query: str) -> list[RawListing]:
         results: list[RawListing] = []
-        cards = await page.query_selector_all(
-            "article.product-miniature, .js-product-miniature, "
-            ".product-miniature, .product-container"
-        )
+        # PrestaShop 1.6: products are in ul.products > li.clearfix
+        cards = await page.query_selector_all("ul.products > li.clearfix")
 
         for card in cards[:50]:
             try:
@@ -40,10 +38,17 @@ class DezosmotoAdapter(PlaywrightBaseAdapter):
         return results
 
     async def _parse_card(self, card) -> RawListing | None:
-        title_el = await card.query_selector(".product-title a, h3 a, a.product-name")
+        # PS 1.6: h5 > a.product-name inside div.product-content
+        title_el = await card.query_selector("a.product-name")
+        if not title_el:
+            title_el = await card.query_selector("h5 a, .product-content a")
         if not title_el:
             return None
         title = (await title_el.inner_text()).strip()
+        if not title:
+            # PS 1.6 may store title in the 'title' attribute
+            title = await title_el.get_attribute("title") or ""
+            title = title.strip()
         if not title:
             return None
 
@@ -54,15 +59,17 @@ class DezosmotoAdapter(PlaywrightBaseAdapter):
         source_id = hashlib.md5(listing_url.encode()).hexdigest()[:12]
 
         price = 0.0
-        price_el = await card.query_selector(".product-price-and-shipping .price, .price")
+        # PS 1.6: div.price-box > span.price
+        price_el = await card.query_selector(".price-box .price, span.price")
         if price_el:
             price_text = (await price_el.inner_text()).strip()
             price = self._parse_price(price_text)
 
         photos: list[str] = []
-        img_el = await card.query_selector("img[src], img[data-src]")
+        # PS 1.6: image inside a.products-block-image
+        img_el = await card.query_selector("a.products-block-image img, img[src]")
         if img_el:
-            src = await img_el.get_attribute("data-src") or await img_el.get_attribute("src") or ""
+            src = await img_el.get_attribute("src") or ""
             if src and not src.startswith("data:"):
                 photos.append(src)
 
